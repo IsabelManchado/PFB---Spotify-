@@ -4,7 +4,8 @@ USE Proyecto_Spotify;
 
 CREATE TABLE artistas (
     artista_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL
+    nombre VARCHAR(255) NOT NULL,
+    updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE canciones (
@@ -21,5 +22,6 @@ CREATE TABLE canciones (
     tempo FLOAT,
     acousticness FLOAT,
     instrumentalness FLOAT,
-    speechiness FLOAT
+    speechiness FLOAT,
+    updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
