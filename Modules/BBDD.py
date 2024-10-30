@@ -88,7 +88,7 @@ def load_data(df):
     try:
         engine = create_engine(f'mysql+pymysql://{user}:{password}@localhost/{database}')
 
-        # Abrir la conección
+        # Abrir la conexión
         connection = engine.connect()
 
         artistas_df = df[['Artistas']].drop_duplicates().rename(columns = {'Artistas': 'nombre'})

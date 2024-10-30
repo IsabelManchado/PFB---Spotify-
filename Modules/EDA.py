@@ -5,8 +5,8 @@ import pandas as pd
 def collect_data(playlist_id):
     #Autenticacion
     
-    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
-    client_secret="6d862e32499a4ddbadd0b4aaa8295424"
+    client_id= "12f88fe9b7c14982bd0f03de6882817b"
+    client_secret="58725b42fc634f12878f4dc8ac548ff4"
     # URL para la autenticación
     auth_url = 'https://accounts.spotify.com/api/token'
 
@@ -101,7 +101,9 @@ def collect_data(playlist_id):
                 'Tempo': tempo,
                 'Acousticness': acousticness,
                 'Instrumentalness': instrumentalness,
-                'Speechiness': speechiness
+                'Speechiness': speechiness,
+                "Playlist":playlist_info["name"],
+                "Imagenes":playlist_info["images"][0]["url"]
             })
 
     else:
