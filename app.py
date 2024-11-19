@@ -6,6 +6,7 @@ import altair as alt
 from Modules.EDA import collect_data
 from Modules.graficos_playlist import graficos
 from Modules.Clustering import clustering_canciones,clustering_playlist
+from Modules.graficos_sprint_2 import grafico_genero,grafico_artistas1,atributos,graficos_extras,comparador_genero,comparador_artistas,comparador_atributos
 import pymysql
 
 
@@ -82,66 +83,82 @@ def eda_app():
                 st.write("Por favor, selecciona una opción del menú lateral.")
 
             elif sub_menu == "Características Medibles de Canciones":
-                col=st.columns((1.5,5,1))
+                col=st.columns((1,5.5,1))
                 with col[1]:
                     st.subheader("Características Medibles de Canciones")
+                    st.subheader("")
+                 
+                
                 col = st.columns((1,1), gap='small')
                 with col[0]:
-                    st.markdown('##### Artistas más escuchados')
-                    if playlist_id:
-                        raw_data = collect_data(playlist_id)
-                        
-                        st.subheader("Características Medibles de Canciones")
-                        
-                        heatmap, bubble, scatter, hist, box_plot, violin, area= graficos(raw_data) 
+                    st.subheader('Artistas')
+                    df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
+                    grafico_artistas1(df)
+                    st.markdown("Artistas más escuchados por número total de canciones")
                     
-                        st.plotly_chart(heatmap)
-            
-                        st.plotly_chart(bubble)
 
-                        st.plotly_chart(scatter)
-
-                        st.plotly_chart(hist)
-
-                        st.plotly_chart(box_plot)
-
-                        st.plotly_chart(violin)
-
-                        st.plotly_chart(area)
                 with col[1]:
-                    st.markdown('##### Géneros más escuchados')
+                    st.subheader('Géneros')
+                    df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
+                    grafico_genero(df)
+                    st.markdown("Géneros más escuchados")
+                                         
+                    
                 with st.container():
-                    st.markdown('##### Gráficos extras')      
+                    st.subheader('Gráficos Extras')
+                    df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
+                    graficos_extras(df)    
 
             elif sub_menu == "Resumen de Estadísticas de Playlist":
                 col=st.columns((1.5,5,1))
                 with col[1]:
                     st.subheader("Resumen de Estadísticas de Playlist")
-                st.markdown('##### Media de los atributos')
-                if playlist_id:
-                    raw_data = collect_data(playlist_id)
+                
+                df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
+                atributos(df)
+                
+
+                # if playlist_id:
+                #     raw_data = collect_data(playlist_id)
             
-                    st.write(f"Mostrando {len(raw_data)} canciones de {len(raw_data)}")
-                    st.write(f"La duración total de las canciones es de {raw_data["Duración (segundos)"].sum()/3600} horas")
-                    st.write("Promedio de las características:")
-                    promedio_caracteristicas=raw_data[["Popularidad","Danceability", "Energy", "Valence", "Tempo", "Acousticness", "Instrumentalness", "Speechiness"]].mean()
-                    for caracteristica, valor in promedio_caracteristicas.items():
-                        st.write(f"**{caracteristica.capitalize()}**: {valor:.2f}")
+                #     st.write(f"Mostrando {len(raw_data)} canciones de {len(raw_data)}")
+                #     st.write(f"La duración total de las canciones es de {raw_data["Duración (segundos)"].sum()/3600} horas")
+                #     st.write("Promedio de las características:")
+                #     promedio_caracteristicas=raw_data[["Popularidad","Danceability", "Energy", "Valence", "Tempo", "Acousticness", "Instrumentalness", "Speechiness"]].mean()
+                #     for caracteristica, valor in promedio_caracteristicas.items():
+                #         st.write(f"**{caracteristica.capitalize()}**: {valor:.2f}")
                 
                 
                         
 
             elif sub_menu == "Comparador de Canciones":
-                col=st.columns((2,4,1))
+                col=st.columns((1,5.5,1))
                 with col[1]:
                     st.subheader("Comparador de Canciones")
+                    st.subheader("")
+
+                    df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+                    playlist_options = df_tracks["Playlist ID"].unique()
+                    playlist_id1 = st.selectbox("Selecciona el ID de la primera playlist:", playlist_options)
+                    playlist_id2 = st.selectbox("Selecciona el ID de la segunda playlist:", playlist_options)
+                
                 col = st.columns((1,1), gap='small')
                 with col[0]:
-                    st.markdown('##### Artistas más escuchados')
+                    st.subheader('Artistas')
+                    comparador_artistas(playlist_id1,playlist_id2)
+                    st.markdown("Comparación de Artistas por Playlist")
+                    
+
                 with col[1]:
-                    st.markdown('##### Géneros más escuchados')
+                    st.subheader('Géneros')
+                    comparador_genero(playlist_id1,playlist_id2)
+                    st.markdown("Comparación de géneros por Playlist")
+                
                 with st.container():
-                    st.markdown('##### Gráficos extras')    
+                    st.subheader('Media de atributos')
+                    comparador_atributos(playlist_id1,playlist_id2)
+                    st.markdown("Comparación de atributos por Playlist")
+
                 
 
             

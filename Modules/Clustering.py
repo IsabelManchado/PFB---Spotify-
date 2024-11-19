@@ -154,7 +154,7 @@ def clustering_playlist():
 
     # Calculamos la media de las características numéricas para cada playlist
     playlist_features = ['duración (segundos)', 'popularidad', 'danceability', 'energy', 'valence', 
-                        'tempo', 'acousticness', 'instrumentalness', 'speechiness']
+                        'tempo', 'acousticness', 'instrumentalness', 'speechiness',"explícito", "clave (key)","modo (mode)"]
 
     # Agrupamos por 'Playlist ID' y calculamos la media de cada característica
     df_playlist_stats = df_playlist_canciones.groupby('Playlist ID')[playlist_features].mean().reset_index()
