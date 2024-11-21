@@ -35,7 +35,6 @@ def clustering_canciones(playlist_id):
 
     #print("Escalador guardado en el archivo 'scaler.pkl'.")
 
-
     features = ['duración (segundos)', 'popularidad', 'danceability', 'energy', 'valence', 
                 'tempo', 'acousticness', 'instrumentalness', 'speechiness',"explícito", "clave (key)","modo (mode)"]
 
@@ -63,7 +62,6 @@ def clustering_canciones(playlist_id):
     df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
 
     # Filtramos las canciones de una playlist específica
-
     df_playlist_canciones = df_tracks[df_tracks['Playlist ID'] == playlist_id]
 
     # Verificamos cuántas canciones tiene la playlist
@@ -72,11 +70,8 @@ def clustering_canciones(playlist_id):
     # Obtener las canciones de la playlist
     canciones_playlist = df_canciones[df_canciones['canción id'].isin(df_playlist_canciones['Canción ID'])]
 
-
-
     # Verificamos las canciones filtradas
     #print("Primeras canciones de la playlist filtrada:", canciones_playlist.head())
-
 
     # Seleccionamos las características numéricas que hemos escalado para el clustering
     X = df_canciones_scaled.loc[canciones_playlist.index, features]
@@ -90,8 +85,6 @@ def clustering_canciones(playlist_id):
     # Añadimos las etiquetas de los clusters al DataFrame de canciones
     canciones_playlist['Cluster'] = kmeans.labels_
 
-    
-    
     plt.style.use("dark_background")
     
     with st.container():
@@ -199,7 +192,6 @@ def clustering_playlist():
         st.markdown("Este gráfico muestra las playlist asignadas a cada cluster.")
         st.divider()
 
-
     with st.container():
         fig, ax = plt.subplots()
         df1=(df_playlist_stats['Cluster'].value_counts()).to_frame()
@@ -224,8 +216,6 @@ def clustering_playlist():
         ax.set_title("Gráfico de Dispersión con Clústeres de Playlist")
         ax.legend()
         
-
     plt.tight_layout()
 
     return st.pyplot(fig)
-
