@@ -58,7 +58,7 @@ def grafico_artistas1(df,playlist_id):
     artist_counts = flattened_artists.value_counts().reset_index()
     artist_counts.columns = ['Artista', 'Count']
     top_artists = artist_counts.head(10)
-
+    plt.style.use("dark_background")
     fig=plt.figure(figsize=(12, 22))
     ax=sns.barplot(
         x='Count',

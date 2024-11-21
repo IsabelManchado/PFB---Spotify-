@@ -20,6 +20,7 @@ def playlist2(playlist_url1,playlist_url2):
     playlist_id1 = None 
     playlist_id2 = None 
     playlist_list=[]
+    list=[]
     
     if "playlist/" in playlist_url1 and playlist_url2:
         try:

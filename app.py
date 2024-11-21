@@ -157,35 +157,41 @@ def eda_app():
                     st.subheader("Comparador de Canciones")
                     st.subheader("")
 
-                    df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+                    # df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
                     # playlist_options = df_tracks["Playlist ID"].unique()
                     # playlist_id1 = st.selectbox("Selecciona el ID de la primera playlist:", playlist_options)
                     # playlist_id2 = st.selectbox("Selecciona el ID de la segunda playlist:", playlist_options)
                     playlist_url1=st.text_input("Ingrese los enlaces de las playlists:")
                     playlist_url2=st.text_input("")
-                    playlist_id1=playlist2(playlist_url1,playlist_url2)[0]
-                    playlist_id2=playlist2(playlist_url1,playlist_url2)[1]
-                    
-                
-                col = st.columns((1,1), gap='small')
-                with col[0]:
-                    st.subheader('Artistas')
-                    
-                    comparador_artistas(playlist_id1,playlist_id2)
-                    
-                    st.markdown("Comparación de Artistas por Playlist")
-                    
+                playlist_ids = playlist2(playlist_url1, playlist_url2)
+                if len(playlist_ids) == 2:
+                    playlist_id1 = playlist_ids[0]
+                    playlist_id2 = playlist_ids[1]
 
-                with col[1]:
-                    comparador_genero(playlist_id1,playlist_id2)
+                    col = st.columns((1,1), gap='small')
+                    with col[0]:
+                        st.subheader('Artistas')
+                        
+                        if playlist_id1 and playlist_id2:
+                            comparador_artistas(playlist_id1,playlist_id2)
+                        
+                        st.markdown("Comparación de Artistas por Playlist")
+                        
+
+                    with col[1]:
+                        if playlist_id1 and playlist_id2:
+                            comparador_genero(playlist_id1,playlist_id2)
+                        
+                        st.markdown("Comparación de géneros por Playlist")
                     
-                    st.markdown("Comparación de géneros por Playlist")
-                
-                with st.container():
-                    st.subheader('Media de atributos')
-                    comparador_atributos(playlist_id1,playlist_id2)
-                    
-                    st.markdown("Comparación de atributos por Playlist")
+                    with st.container():
+                        st.subheader('Media de atributos')
+                        if playlist_id1 and playlist_id2:
+                            comparador_atributos(playlist_id1,playlist_id2)
+                        
+                        st.markdown("Comparación de atributos por Playlist")
+                else:
+                        st.error("No se pudieron extraer ambas playlists. Verifique los enlaces ingresados.")
 
             
             elif sub_menu == "Segmentación de Playlist":
