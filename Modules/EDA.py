@@ -70,6 +70,8 @@ def collect_data(playlist_id):
             track_popularity = track['popularity']
             track_explicit = track['explicit']
             track_release_date = track['album']['release_date']
+            track_url = track["external_urls"]["spotify"]
+            track_imagen = track["album"]["images"][0]["url"] if track["album"]["images"] else None
 
             # Hacer la petición GET para obtener las características de audio de cada canción
             audio_features_response = requests.get(audio_features_url + track_id, headers=headers)
@@ -83,18 +85,23 @@ def collect_data(playlist_id):
                 acousticness = audio_features['acousticness']
                 instrumentalness = audio_features['instrumentalness']
                 speechiness = audio_features['speechiness']
+                clave = audio_features['key']
+                modo = audio_features['mode']
             else:
                 # En caso de fallo, usamos valores nulos para esos atributos
                 danceability = energy = valence = tempo = acousticness = instrumentalness = speechiness = None
 
             # Añadir la información de la canción a la lista
             playlist_data.append({
+                'Canción ID': track_id,
                 'Nombre': track_name,
                 'Artistas': track_artists,
                 'Duración (segundos)': track_duration,
                 'Popularidad': track_popularity,
                 'Explícito': track_explicit,
                 'Fecha de Lanzamiento': track_release_date,
+                'Url de Spotify': track_url,
+                'Imagen': track_imagen,
                 'Danceability': danceability,
                 'Energy': energy,
                 'Valence': valence,
@@ -103,7 +110,9 @@ def collect_data(playlist_id):
                 'Instrumentalness': instrumentalness,
                 'Speechiness': speechiness,
                 "Playlist":playlist_info["name"],
-                "Imagenes":playlist_info["images"][0]["url"]
+                'Clave (Key)': clave,
+                'Modo (Mode)': modo
+                
             })
 
     else:
