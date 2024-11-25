@@ -6,8 +6,7 @@ import altair as alt
 from Modules.EDA import collect_data
 from Modules.graficos_playlist import graficos
 from Modules.Clustering import clustering_canciones,clustering_playlist
-from Modules.graficos_sprint_3 import grafico_genero,grafico_artistas1,atributos,graficos_extras,comparador_genero,comparador_artistas,comparador_atributos
-from Modules.enplace_playlist import playlist,playlist2
+from Modules.graficos_sprint_2 import grafico_genero,grafico_artistas1,atributos,graficos_extras,comparador_genero,comparador_artistas,comparador_atributos
 import pymysql
 
 
@@ -82,60 +81,41 @@ def eda_app():
 
             if sub_menu == "Selecciona una opción":
                 st.write("Por favor, selecciona una opción del menú lateral.")
-                
 
             elif sub_menu == "Características Medibles de Canciones":
                 col=st.columns((1,5.5,1))
                 with col[1]:
                     st.subheader("Características Medibles de Canciones")
                     st.subheader("")
-                    playlist_url=st.text_input("Ingrese el enlace playlist de Spotify:")
-                    
                  
                 
                 col = st.columns((1,1), gap='small')
                 with col[0]:
                     st.subheader('Artistas')
                     df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
-                    playlist_id=playlist(playlist_url)                   
-                    if playlist_id:
-                        grafico_artistas1(df, playlist_id)
-                        st.markdown("Artistas más escuchados por número total de canciones")
-                    
+                    grafico_artistas1(df)
+                    st.markdown("Artistas más escuchados por número total de canciones")
                     
 
                 with col[1]:
                     st.subheader('Géneros')
                     df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
-                    playlist_id=playlist(playlist_url)                   
-                    if playlist_id:
-                        grafico_genero(df,playlist_id)
-                    
-                    
+                    grafico_genero(df)
                     st.markdown("Géneros más escuchados")
                                          
                     
                 with st.container():
                     st.subheader('Gráficos Extras')
                     df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
-                    playlist_id=playlist(playlist_url)                   
-                    if playlist_id:
-                        graficos_extras(df,playlist_id)
-
-                       
+                    graficos_extras(df)    
 
             elif sub_menu == "Resumen de Estadísticas de Playlist":
                 col=st.columns((1.5,5,1))
                 with col[1]:
                     st.subheader("Resumen de Estadísticas de Playlist")
-                    playlist_url=st.text_input("Ingrese el enlace playlist de Spotify:")
                 
                 df = pd.read_csv(r'..\PFB---Spotify-\EDA\canciones_total.csv')
-                playlist_id=playlist(playlist_url)                   
-                if playlist_id:
-                    atributos(df,playlist_id)
-                    
-                
+                atributos(df)
                 
 
                 # if playlist_id:
@@ -157,41 +137,29 @@ def eda_app():
                     st.subheader("Comparador de Canciones")
                     st.subheader("")
 
-                    # df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
-                    # playlist_options = df_tracks["Playlist ID"].unique()
-                    # playlist_id1 = st.selectbox("Selecciona el ID de la primera playlist:", playlist_options)
-                    # playlist_id2 = st.selectbox("Selecciona el ID de la segunda playlist:", playlist_options)
-                    playlist_url1=st.text_input("Ingrese los enlaces de las playlists:")
-                    playlist_url2=st.text_input("")
-                playlist_ids = playlist2(playlist_url1, playlist_url2)
-                if len(playlist_ids) == 2:
-                    playlist_id1 = playlist_ids[0]
-                    playlist_id2 = playlist_ids[1]
-
-                    col = st.columns((1,1), gap='small')
-                    with col[0]:
-                        st.subheader('Artistas')
-                        
-                        if playlist_id1 and playlist_id2:
-                            comparador_artistas(playlist_id1,playlist_id2)
-                        
-                        st.markdown("Comparación de Artistas por Playlist")
-                        
-
-                    with col[1]:
-                        if playlist_id1 and playlist_id2:
-                            comparador_genero(playlist_id1,playlist_id2)
-                        
-                        st.markdown("Comparación de géneros por Playlist")
+                    df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+                    playlist_options = df_tracks["Playlist ID"].unique()
+                    playlist_id1 = st.selectbox("Selecciona el ID de la primera playlist:", playlist_options)
+                    playlist_id2 = st.selectbox("Selecciona el ID de la segunda playlist:", playlist_options)
+                
+                col = st.columns((1,1), gap='small')
+                with col[0]:
+                    st.subheader('Artistas')
+                    comparador_artistas(playlist_id1,playlist_id2)
+                    st.markdown("Comparación de Artistas por Playlist")
                     
-                    with st.container():
-                        st.subheader('Media de atributos')
-                        if playlist_id1 and playlist_id2:
-                            comparador_atributos(playlist_id1,playlist_id2)
-                        
-                        st.markdown("Comparación de atributos por Playlist")
-                else:
-                        st.error("No se pudieron extraer ambas playlists. Verifique los enlaces ingresados.")
+
+                with col[1]:
+                    st.subheader('Géneros')
+                    comparador_genero(playlist_id1,playlist_id2)
+                    st.markdown("Comparación de géneros por Playlist")
+                
+                with st.container():
+                    st.subheader('Media de atributos')
+                    comparador_atributos(playlist_id1,playlist_id2)
+                    st.markdown("Comparación de atributos por Playlist")
+
+                
 
             
             elif sub_menu == "Segmentación de Playlist":
@@ -199,23 +167,19 @@ def eda_app():
                 with col[1]:
                     st.subheader("Segmentación de Playlist")
                     st.subheader("")
-                playlist_url=st.text_input("Ingrese el enlace playlist de Spotify:")
-                playlist_id=playlist(playlist_url)
-                st.subheader('Gráficos dispersión canciones de la playlist seleccionada')
-                # df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
-                # playlist_options = df_tracks["Playlist ID"].unique()
-                # playlist_id = st.selectbox("Selecciona el ID de la playlist de Spotify:", playlist_options)
-                # if st.button("Ok"):
-                #     if playlist_id:
-                               
-                if playlist_id:
-                    clustering_canciones(playlist_id)
-                st.markdown("Este gráfico muestra la distribución de los clusteres reduciendo a dos dimensiones las características por el método PCA")
+                 
+                st.subheader('Gráficos dispersión canciones')
+                df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+                playlist_options = df_tracks["Playlist ID"].unique()
+                playlist_id = st.selectbox("Selecciona el ID de la playlist de Spotify:", playlist_options)
+                if st.button("Ok"):
+                    if playlist_id:
+                        clustering_canciones(playlist_id)
+                        st.markdown("Este gráfico muestra la distribución de los clusteres reduciendo a dos dimensiones las características por el método PCA")
                             
                 st.subheader("")
-                st.subheader('Gráficos dispersión de todas las playlists de la base de datos')
-                if playlist_id:
-                    clustering_playlist() 
+                st.subheader('Gráficos dispersión playlist')
+                clustering_playlist() 
                 st.markdown("Este gráfico muestra la distribución de los clusteres reduciendo a dos dimensiones las características por el método PCA")
     
     elif menu == "Vistas Específicas":
@@ -223,8 +187,7 @@ def eda_app():
         with col2:
             st.header("Vistas Específicas")
         
-            playlist_url=st.text_input("Ingrese el enlace playlist de Spotify:")
-            playlist_id=playlist(playlist_url)
+            playlist_id = st.text_input("Ingresa el ID de la playlist de Spotify:")
         
             if st.button("Ejecutar"):
                 if playlist_id:
