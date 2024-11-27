@@ -31,8 +31,6 @@ CREATE TABLE canciones (
         ON UPDATE CASCADE
 );
 
-USE Proyecto_Spotify;
-
 CREATE TABLE playlist (
     cancion_id VARCHAR(50) NOT NULL,
     playlist_id VARCHAR(50),
