@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import pymysql
 
 # Datos de los participantes
 participants = [
@@ -40,7 +39,7 @@ st.set_page_config(
 # Título de la página
 st.title("About Us")
 st.write("Nos conocimos durante el bootcamp de Hack a Boss en Data Science & AI. A pesar de nuestras diversas edades y nacionalidades, nos une una pasión común por la innovación y la solución de problemas. Estamos convencidos de que la colaboración y el trabajo en equipo son esenciales, y que la diversidad de perspectivas enriquece nuestra creatividad y mejora nuestra capacidad de encontrar soluciones efectivas.")
-st.write("Buscamos impactar positivamente a través de la tecnología y la innovación continua")
+st.write("Buscamos impactar positivamente a través de la tecnología y la innovación continua.")
 
 # Mostrar información de cada participante
 for participant in participants:
