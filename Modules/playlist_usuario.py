@@ -15,8 +15,8 @@ import streamlit as st
 def collect_data(playlist_id):
     #Autenticacion
     
-    client_id = '5797939a603f4dfc8ca8a21c44fceaa7'  
-    client_secret = 'acc2eb4696e24a3685f60771a77bfe7c'
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
     # URL para la autenticación
     auth_url = 'https://accounts.spotify.com/api/token'
 
@@ -96,10 +96,10 @@ def collect_data(playlist_id):
                 instrumentalness = audio_features['instrumentalness']
                 speechiness = audio_features['speechiness']
                 clave = audio_features['key']
-                modo = audio_features['mode']
+                modo = audio_features['mode'] 
             else:
                 # En caso de fallo, usamos valores nulos para esos atributos
-                danceability = energy = valence = tempo = acousticness = instrumentalness = speechiness = None
+                danceability = energy = valence = tempo = acousticness = instrumentalness = speechiness = clave = modo = None
             
             imagen_playlist = requests.get(img_url, headers=headers)
             if imagen_playlist.status_code == 200:

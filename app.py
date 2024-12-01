@@ -6,7 +6,7 @@ from Modules.EDA import collect_data
 from Modules.graficos_playlist import graficos
 from Modules.Clustering import clustering_canciones,clustering_playlist
 from Modules.graficos_sprint_3 import grafico_genero,grafico_artistas1,atributos,graficos_extras,comparador_genero,comparador_artistas,comparador_atributos
-from Modules.enplace_playlist import playlist,playlist2
+from Modules.enlace_playlist import playlist,playlist2
 import pymysql
 
 

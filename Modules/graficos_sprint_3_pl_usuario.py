@@ -221,8 +221,8 @@ def comparador_genero1(playlist_id1,playlist_id2):
     playlist_seleccionada1 = collect_data(playlist_id1)
     playlist_seleccionada2 = collect_data(playlist_id2)
 
-    client_id = '5797939a603f4dfc8ca8a21c44fceaa7'  
-    client_secret = 'acc2eb4696e24a3685f60771a77bfe7c'
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
     generos = ['pop', 'rock', 'hip hop', 'electronic', 'classical', 'jazz', 'country', 'latin']
     df_canciones1=predecir_genero_canciones(playlist_seleccionada1, client_id, client_secret, generos)
     df_canciones2=predecir_genero_canciones(playlist_seleccionada2, client_id, client_secret, generos)
@@ -255,8 +255,8 @@ def comparador_artistas1(playlist_id1,playlist_id2):
     playlist_seleccionada1 = collect_data(playlist_id1)
     playlist_seleccionada2 = collect_data(playlist_id2)
 
-    client_id = '5797939a603f4dfc8ca8a21c44fceaa7'  
-    client_secret = 'acc2eb4696e24a3685f60771a77bfe7c'
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
     generos = ['pop', 'rock', 'hip hop', 'electronic', 'classical', 'jazz', 'country', 'latin']
     df_canciones1=predecir_genero_canciones(playlist_seleccionada1, client_id, client_secret, generos)
     df_canciones2=predecir_genero_canciones(playlist_seleccionada2, client_id, client_secret, generos)
@@ -295,8 +295,8 @@ def comparador_atributos1(playlist_id1,playlist_id2):
     playlist_seleccionada1 = collect_data(playlist_id1)
     playlist_seleccionada2 = collect_data(playlist_id2)
 
-    client_id = '5797939a603f4dfc8ca8a21c44fceaa7'  
-    client_secret = 'acc2eb4696e24a3685f60771a77bfe7c'
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
     generos = ['pop', 'rock', 'hip hop', 'electronic', 'classical', 'jazz', 'country', 'latin']
     df_canciones1=predecir_genero_canciones(playlist_seleccionada1, client_id, client_secret, generos)
     df_canciones2=predecir_genero_canciones(playlist_seleccionada2, client_id, client_secret, generos)
@@ -360,6 +360,154 @@ def comparador_atributos1(playlist_id1,playlist_id2):
     return st.plotly_chart(fig)
 
 
+def comparador_genero_cancion(playlist_id1,playlist_id2,selected_song1,selected_song2):
+    # df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+    # df_canciones = pd.read_csv(r"..\PFB---Spotify-\EDA\canciones_total.csv")
+
+    # df_playlist_canciones = pd.merge(df_tracks, df_canciones, left_on="Canción ID", right_on="canción id")
+    playlist_seleccionada1 = collect_data(playlist_id1)
+    playlist_seleccionada2 = collect_data(playlist_id2)
+
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
+    generos = ['pop', 'rock', 'hip hop', 'electronic', 'classical', 'jazz', 'country', 'latin']
+    df_canciones1=predecir_genero_canciones(playlist_seleccionada1, client_id, client_secret, generos)
+    df_canciones2=predecir_genero_canciones(playlist_seleccionada2, client_id, client_secret, generos)
+
+
+    df_playlist_canciones = pd.concat([df_canciones1, df_canciones2], ignore_index=True)
+
+    df_playlist_stats = df_playlist_canciones.groupby(['nombre', 'predicted_genre']).size().reset_index()
+    filtered_df1 = df_playlist_stats[df_playlist_stats["Nombre"].isin([selected_song1, selected_song2])]
+    filtered_df1.columns = ['Canción','Género', 'Conteo']
+    # playlists_filtradas = [playlist_id1, playlist_id2]  
+    # df_filtrado = df_playlist_stats[df_playlist_stats['Playlist ID'].isin(playlists_filtradas)]
+    plt.style.use("dark_background")
+    fig=plt.figure(figsize=(12, 18))
+    ax=sns.barplot(
+        x='Conteo',
+        y='Género',
+        hue="Canción",
+        data=filtered_df1,
+        palette='viridis',
+        
+    )
+    ax.set_title('Géneros de las canciones')
+    ax.set_xlabel('Conteo')
+    ax.set_ylabel('Género')
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=24)
+    return st.pyplot(fig) 
+
+def comparador_artistas_canciones(playlist_id1,playlist_id2,selected_song1,selected_song2):
+
+    playlist_seleccionada1 = collect_data(playlist_id1)
+    playlist_seleccionada2 = collect_data(playlist_id2)
+
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
+    generos = ['pop', 'rock', 'hip hop', 'electronic', 'classical', 'jazz', 'country', 'latin']
+    df_canciones1=predecir_genero_canciones(playlist_seleccionada1, client_id, client_secret, generos)
+    df_canciones2=predecir_genero_canciones(playlist_seleccionada2, client_id, client_secret, generos)
+
+
+    df_playlist_canciones = pd.concat([df_canciones1, df_canciones2], ignore_index=True)
+
+    
+    artist_counts = df_playlist_canciones.groupby(['nombre', 'artistas']).size().reset_index()
+    filtered_df1 = artist_counts[artist_counts["Nombre"].isin([selected_song1, selected_song2])]
+
+
+    # df_canciones['artistas'] = df_canciones['artistas'].astype(str)
+    # all_artists = df_canciones['artistas'].str.split(', ')
+    # flattened_artists = all_artists.explode()
+    # artist_counts = flattened_artists.value_counts().reset_index()
+    filtered_df1.columns = ['Canción','Artista', 'Count']
+    # playlists_filtradas = [playlist_id1, playlist_id2]  
+    # df_filtrado = artist_counts[artist_counts['Playlist ID'].isin(playlists_filtradas)]
+    top_artist=filtered_df1.sort_values(by=["Count"], ascending=False).head(15)
+
+    fig=plt.figure(figsize=(12, 22))
+    ax=sns.barplot(
+        x='Count',
+        y='Artista',
+        hue='Canción',
+        data=top_artist,
+        palette='viridis'
+    )
+    ax.set_title('Artistas')
+    ax.set_xlabel('Número de Canciones')
+    ax.set_ylabel('Artista')
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=24)
+    return st.pyplot(fig)  
+
+def comparador_atributos_canciones(playlist_id1,playlist_id2,selected_song1,selected_song2):
+    playlist_seleccionada1 = collect_data(playlist_id1)
+    playlist_seleccionada2 = collect_data(playlist_id2)
+
+    client_id= "06c1d06e2e3149e7a07f5aba3b28961a"
+    client_secret="c51a167e2e294337b5f80998a035b625"
+    generos = ['pop', 'rock', 'hip hop', 'electronic', 'classical', 'jazz', 'country', 'latin']
+    df_canciones1=predecir_genero_canciones(playlist_seleccionada1, client_id, client_secret, generos)
+    df_canciones2=predecir_genero_canciones(playlist_seleccionada2, client_id, client_secret, generos)
+
+
+    df_playlist_canciones = pd.concat([df_canciones1, df_canciones2], ignore_index=True)
+
+
+    mean_features=['nombre','danceability', 'energy', 'valence', 'tempo',
+                      'acousticness', 'instrumentalness', 'speechiness',
+                      'popularidad', 'duración (segundos)']
+    df_mean = df_playlist_canciones[mean_features]
+    
+    # Calcular medias por Playlist ID
+    df = df_mean.groupby('nombre').mean().reset_index()
+    filtered_df1 = df[df["nombre"].isin([selected_song1, selected_song2])]
+
+    # Filtrar las playlists específicas
+    # playlists_filtradas = [playlist_id1, playlist_id2]
+    # df_filtrado = df[df['playlist'].isin(playlists_filtradas)]
+    
+    # Definir atributos para cada radar
+    features_1 = ['danceability', 'energy', 'valence', 'acousticness', 'instrumentalness', 'speechiness']
+    features_2 = ['tempo', 'popularidad', 'duración (segundos)']
+    fig = make_subplots(
+        rows=1, cols=2,
+        specs=[[{'type': 'polar'}, {'type': 'polar'}]],
+        subplot_titles=("Media de Atributos del Grupo 1", "Media de Atributos del Grupo 2"))
+    
+    valores_unicos = filtered_df1['nombre'].unique().tolist()
+    for playlist_id in valores_unicos:
+            # Filtrar datos para la playlist actual
+            df_1 = filtered_df1[filtered_df1['nombre'] == playlist_id][features_1].mean()
+            df_2 = filtered_df1[filtered_df1['nombre'] == playlist_id][features_2].mean()
+            
+            # Gráfico de radar para features_1
+            fig.add_trace(go.Scatterpolar(
+                r=df_1.values,
+                theta=features_1,
+                fill='toself',
+                name=f'Canción {playlist_id} - Atributos 1'
+            ), row=1, col=1)
+
+            # Gráfico de radar para features_2
+            fig.add_trace(go.Scatterpolar(
+                r=df_2.values,
+                theta=features_2,
+                fill='toself',
+                name=f'Canción {playlist_id} - Atributos 2'
+            ), row=1, col=2)
+
+        # Configurar el layout del gráfico
+    fig.update_layout(
+        template='plotly_dark',
+        polar=dict(radialaxis=dict(visible=True)),
+        title="Comparación de Atributos entre Canciones"
+    )
+
+    # Mostrar el gráfico en Streamlit
+    
+    
+    return st.plotly_chart(fig)
 
 
 

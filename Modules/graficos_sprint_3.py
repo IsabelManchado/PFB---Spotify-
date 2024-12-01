@@ -325,7 +325,125 @@ def comparador_atributos(playlist_id1,playlist_id2):
     
     return st.plotly_chart(fig)
 
+def comparador_genero_canciones1(playlist_id1,playlist_id2,selected_song1,selected_song2):
+    df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+    df_canciones = pd.read_csv(r"..\PFB---Spotify-\EDA\canciones_total.csv")
 
+    df_playlist_canciones = pd.merge(df_tracks, df_canciones, left_on="Canción ID", right_on="canción id")
+    df_playlist_filtrado=df_playlist_canciones[df_playlist_canciones['Playlist ID'].isin([playlist_id1,playlist_id2])]
+
+    df_playlist_stats = df_playlist_filtrado.groupby(['nombre', 'predicted_genre']).size().reset_index()
+    df_playlist_stats.columns = ['Canción','Género', 'Conteo']
+    
+    df_filtrado = df_playlist_stats[df_playlist_stats['Canción'].isin([selected_song1, selected_song2])]
+    plt.style.use("dark_background")
+    fig=plt.figure(figsize=(8, 6))
+    ax=sns.barplot(
+        x='Conteo',
+        y='Género',
+        hue="Canción",
+        data=df_filtrado,
+        palette='viridis',
+        
+    )
+    ax.set_title('Géneros de las canciones seleccionadas')
+    ax.set_xlabel('Conteo')
+    ax.set_ylabel('Género')
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=24)
+    return st.pyplot(fig) 
+
+def comparador_artistas_canciones1(playlist_id1,playlist_id2,selected_song1,selected_song2):
+
+    df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+    df_canciones = pd.read_csv(r"..\PFB---Spotify-\EDA\canciones_total.csv")
+
+    df_playlist_canciones = pd.merge(df_tracks, df_canciones, left_on="Canción ID", right_on="canción id")
+    df_playlist_filtrado=df_playlist_canciones[df_playlist_canciones['Playlist ID'].isin([playlist_id1,playlist_id2])]
+    artist_counts = df_playlist_filtrado.groupby(['nombre', 'artistas']).size().reset_index()
+
+
+    # df_canciones['artistas'] = df_canciones['artistas'].astype(str)
+    # all_artists = df_canciones['artistas'].str.split(', ')
+    # flattened_artists = all_artists.explode()
+    # artist_counts = flattened_artists.value_counts().reset_index()
+    artist_counts.columns = ['Canción','Artista', 'Count']
+    
+    df_filtrado = artist_counts[artist_counts['Canción'].isin([selected_song1, selected_song2])]
+    top_artist=df_filtrado.sort_values(by=["Count"], ascending=False).head(15)
+
+    
+
+    fig=plt.figure(figsize=(8, 6))
+    ax=sns.barplot(
+        x='Count',
+        y='Artista',
+        hue='Canción',
+        data=top_artist,
+        palette='viridis'
+    )
+    ax.set_title('Artistas de las canciones seleccionadas')
+    ax.set_xlabel('Número de Canciones')
+    ax.set_ylabel('Artista')
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=24)
+    return st.pyplot(fig)  
+
+def comparador_atributos_canciones1(playlist_id1,playlist_id2,selected_song1,selected_song2):
+    df_tracks = pd.read_csv(r"..\PFB---Spotify-\EDA\Tracks_playlists.csv")
+    df_canciones = pd.read_csv(r"..\PFB---Spotify-\EDA\canciones_total.csv")
+
+    df_playlist_canciones = pd.merge(df_tracks, df_canciones, left_on="Canción ID", right_on="canción id")
+    df_playlist_filtrado=df_playlist_canciones[df_playlist_canciones['Playlist ID'].isin([playlist_id1,playlist_id2])]
+    mean_features=['nombre','danceability', 'energy', 'valence', 'tempo',
+                      'acousticness', 'instrumentalness', 'speechiness',
+                      'popularidad', 'duración (segundos)']
+    df_mean = df_playlist_filtrado[mean_features]
+    
+    # Calcular medias por Playlist ID
+    df = df_mean.groupby('nombre').mean().reset_index()
+
+    # Filtrar las playlists específicas
+    selected_songs = [selected_song1,selected_song2]
+    df_filtrado = df[df['nombre'].isin([selected_song1, selected_song2])]
+    
+    # Definir atributos para cada radar
+    features_1 = ['danceability', 'energy', 'valence', 'acousticness', 'instrumentalness', 'speechiness']
+    features_2 = ['tempo', 'popularidad', 'duración (segundos)']
+    fig = make_subplots(
+        rows=1, cols=2,
+        specs=[[{'type': 'polar'}, {'type': 'polar'}]],
+        subplot_titles=("Media de Atributos del Grupo 1", "Media de Atributos del Grupo 2"))
+    
+    for song in selected_songs:
+            # Filtrar datos para la playlist actual
+            df_1 = df_filtrado[df_filtrado['nombre'] == song][features_1].mean()
+            df_2 = df_filtrado[df_filtrado['nombre'] == song][features_2].mean()
+            
+            # Gráfico de radar para features_1
+            fig.add_trace(go.Scatterpolar(
+                r=df_1.values,
+                theta=features_1,
+                fill='toself',
+                name=f'Canción {song} - Atributos 1'
+            ), row=1, col=1)
+
+            # Gráfico de radar para features_2
+            fig.add_trace(go.Scatterpolar(
+                r=df_2.values,
+                theta=features_2,
+                fill='toself',
+                name=f'Canción {song} - Atributos 2'
+            ), row=1, col=2)
+
+        # Configurar el layout del gráfico
+    fig.update_layout(
+        template='plotly_dark',
+        polar=dict(radialaxis=dict(visible=True)),
+        title="Comparación de Atributos entre Playlists"
+    )
+
+    
+    
+    return st.plotly_chart(fig)
 
 
 
