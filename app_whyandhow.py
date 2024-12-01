@@ -546,7 +546,598 @@ else:
 
     st.write("Con esto finalizamos la extracción, transformación y carga de la información obtenida desde la API. Base fundamental para desarrollar éste proyecto")
 
-# Mostrar código SQL y Python con explicación
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### Soy un separador ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# Clusters
+with st.expander("Creación de Clusters"):
+    st.write("Análisis y Clustering de Canciones")
+    st.write("1. Importación de bibliotecas y carga de datos")
+    st.write("- Se cargan los datos de canciones, playlists y la relación entre ambas. Se ajusta la columna explícito para asegurar que sea numérica.")
+    st.code("""
+# Herramientas
+import pandas as pd
+import pickle
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import NearestNeighbors
+from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
+
+# Eliminamos warnings innecesarios
+import warnings
+warnings.filterwarnings('ignore')
+
+# Carga de los datos
+df_canciones = pd.read_csv("canciones_total.csv")
+df_playlists = pd.read_csv("playlists1.csv")
+df_tracks = pd.read_csv("tracks_playlists.csv")
+
+# Conversión del campo 'explícito' a entero
+df_canciones['explícito'] = df_canciones['explícito'].astype(int)
+    """, language = "python")
+    st.write("2. Selección y escalado de características")
+    st.write("- Se escalan las características seleccionadas para estandarizar su rango. El escalador se guarda para su reutilización.")
+    st.code("""
+# Selección de características numéricas relevantes
+features = ['duración (segundos)', 'danceability', 'energy', 'valence', 
+            'tempo', 'acousticness', 'instrumentalness', 'speechiness', "explícito", "clave (key)", "modo (mode)"]
+
+# Escalado de datos
+scaler = StandardScaler()
+df_canciones_scaled = scaler.fit_transform(df_canciones[features])
+df_canciones_scaled = pd.DataFrame(df_canciones_scaled, columns = features)
+
+# Primeros registros escalados
+print(df_canciones_scaled.head())
+print('')
+
+# Guardar el escalador
+with open("scaler.pkl", "wb") as f:
+    pickle.dump(scaler, f)
+
+print("Escalador guardado en el archivo 'scaler.pkl'.")
+print('')
+    """, language = "python")
+    st.write("3. Clustering de canciones en una playlist específica")
+    st.write("- Se filtran las canciones de una playlist y se agrupan en clusters usando K-Means.")
+    st.code("""
+# Filtrar canciones de una playlist específica
+playlist_id = '37i9dQZEVXbMDoHDwVN2tF'
+df_playlist_canciones = df_tracks[df_tracks['Playlist ID'] == playlist_id]
+canciones_playlist = df_canciones[df_canciones['canción id'].isin(df_playlist_canciones['Canción ID'])]
+
+# Verificamos cuántas canciones tiene la playlist
+print(f"Número de canciones en la playlist {playlist_id}: {len(canciones_playlist)}")
+print('')
+
+# Realizar clustering con DBSCAN
+X = df_canciones_scaled.loc[canciones_playlist.index, features]
+dbscan = DBSCAN(eps=2.66, min_samples=3)
+clusters = dbscan.fit_predict(X)
+
+
+# Asignar clusters al DataFrame
+canciones_playlist['Cluster'] = clusters
+
+# Verificar los clusters generados
+print("Distribución de clusters generados por DBSCAN:")
+print(canciones_playlist['Cluster'].value_counts())
+print('')
+
+# Verificar las primeras canciones con su cluster asignado
+print("Primeras canciones de la playlist con clusters asignados:")
+print(canciones_playlist[['nombre', 'Cluster']].head())
+print('')
+    """, language = "python")
+    st.write("NearestNeighbors")
+    st.code("""
+# Damos valor deseado a K
+k = 3  
+
+# Calcular las distancias a los K vecinos más cercanos
+neighbors = NearestNeighbors(n_neighbors=k)
+neighbors_fit = neighbors.fit(X)
+distances, indices = neighbors_fit.kneighbors(X)
+
+# Ordenar las distancias
+distances = np.sort(distances[:, k-1], axis=0)
+
+# Graficar el gráfico de distancias
+plt.plot(distances)
+plt.xlabel('Número de puntos')
+plt.ylabel(f'Distancia al {k}-ésimo vecino más cercano')
+plt.title('Gráfico de distancias K-Vecinos más Cercanos')
+plt.show()
+    """, language = "python")
+    st.write("Análisis y Clustering de Playlists")
+    st.write("1. Unión de Canciones y Playlists")
+    st.write("- Se combinan los datos de canciones (df_canciones) y playlists (df_tracks) para vincular las canciones con sus respectivas playlists")
+    st.code("""
+df_playlist_canciones = pd.merge(df_tracks, df_canciones, left_on = "Canción ID", right_on = "canción id")
+    """, language = "python")
+    st.write("2. Cálculo de Estadísticas por Playlist")
+    st.write("- Se agrupan las canciones por Playlist ID y se calculan las medias de las características numéricas seleccionadas")
+    st.code("""
+playlist_features = ['duración (segundos)', 'danceability', 'energy', 'valence', 
+                     'tempo', 'acousticness', 'instrumentalness', 'speechiness', "explícito", 
+                     "clave (key)", "modo (mode)"]
+
+df_playlist_stats = df_playlist_canciones.groupby('Playlist ID')[playlist_features].mean().reset_index()
+    """, language = "python")
+    st.write("3. Escalado de Datos")
+    st.write("- Se utiliza el mismo escalador previamente guardado (scaler.pkl) para normalizar las características de las playlists")
+    st.code("""
+X_playlists_scaled = scaler.fit_transform(df_playlist_stats[playlist_features])
+    """, language = "python")
+    st.write("4. Clustering de Playlists")
+    st.write("- Se agrupan las playlists en 4 clusters utilizando KMeans")
+    st.code("""
+dbscan = DBSCAN(eps=2.758, min_samples= 5)  
+df_playlist_stats['Cluster'] = dbscan.fit_predict(X_playlists_scaled)
+
+# 3. Verificar la cantidad de clusters formados
+print(df_playlist_stats['Cluster'].value_counts())  # Imprime la cantidad de playlists en cada cluster
+
+# 4. Visualización (si quieres graficar el clustering en 2D usando PCA para reducir dimensiones)
+from sklearn.decomposition import PCA
+
+# Reducimos la dimensionalidad a 2 componentes para visualización
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_playlists_scaled)
+
+# Graficamos el clustering
+plt.figure(figsize=(10, 6))
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=df_playlist_stats['Cluster'], cmap='viridis')
+plt.title('Clustering de Playlists con DBSCAN')
+plt.xlabel('PCA1')
+plt.ylabel('PCA2')
+plt.colorbar(label='Cluster')
+plt.show()
+            
+# Guardamos nuevo CSV con clusters
+df_playlist_stats.to_csv('df_cluster_playlist.csv', index = False)
+    """, language = "python")
+    st.write("5. Visualización y validación")
+    st.code("""
+# Selección de k vecinos más cercanos
+k = 5  
+
+# Calcular las distancias a los k vecinos más cercanos
+neighbors = NearestNeighbors(n_neighbors=k)
+neighbors_fit = neighbors.fit(X_playlists_scaled)
+distances, indices = neighbors_fit.kneighbors(X_playlists_scaled)
+
+# Ordenar las distancias al k-ésimo vecino más cercano
+distances = np.sort(distances[:, k-1], axis=0)
+
+# Graficar el gráfico de distancias
+plt.figure(figsize=(10, 6))
+plt.plot(distances)
+plt.xlabel('Número de puntos')
+plt.ylabel(f'Distancia al {k}-ésimo vecino más cercano')
+plt.title('Gráfico de distancias K-Vecinos más Cercanos')
+plt.grid(True)
+plt.show()
+    """, language = "python")
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### Soy un separador ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+with st.expander("Modelado"):
+    st.write("Herramientas + Comprender & preparar los datos")
+    st.code("""
+# Carga y manejo de datos
+import pandas as pd
+import numpy as np
+
+# Escalado y preprocesamiento
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import mean_squared_error
+from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# Clustering
+from sklearn.cluster import KMeans
+
+# Visualización
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Reducción de dimensionalidad
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+# Almacenamiento de modelos
+import pickle
+
+# Cargar los datos
+df_canciones = pd.read_csv("df_cluster_canciones.csv")
+df_tracks = pd.read_csv("df_cluster_playlist.csv")
+
+# Eliminar duplicados
+df_canciones = df_canciones.drop_duplicates()
+    """, language = "python")
+
+    st.write("1. Análisis exploratorio post-clustering")
+    st.write("Canciones (df_canciones)")
+    st.code("""
+# Seleccionar columnas numéricas
+numeric_columns = df_canciones.select_dtypes(include=['number']).columns
+
+# Verificar si hay valores no válidos en las columnas numéricas
+for col in numeric_columns:
+    print(f"Columna: {col}")
+    print(df_canciones[col].unique())
+    print("")  # Espacio para mejorar legibilidad
+
+# Intentar convertir a numérico, reemplazando valores no válidos con NaN
+for col in numeric_columns:
+    df_canciones[col] = pd.to_numeric(df_canciones[col], errors='coerce')
+
+# Revisar si hay valores NaN después de la conversión
+print(df_canciones[numeric_columns].isnull().sum())
+
+# Reemplazar valores NaN con la media de la columna
+df_canciones[numeric_columns] = df_canciones[numeric_columns].fillna(df_canciones[numeric_columns].mean())
+
+# Agrupar por 'Cluster' y calcular la media solo para las columnas numéricas
+cluster_stats_canciones = df_canciones.groupby('Cluster')[numeric_columns].mean()
+print(cluster_stats_canciones)
+
+print('') # Espacio en respuesta
+    """, language = "python")
+
+    st.write("Visualizazción de los clusters")
+    st.code("""
+# Visualización de los clusters
+pca = PCA(n_components = 2)
+pca_result = pca.fit_transform(df_canciones[numeric_columns])
+
+plt.figure(figsize = (15, 5))
+plt.scatter(pca_result[:, 0], pca_result[:, 1], c = df_canciones['Cluster'], cmap = 'viridis', alpha = 0.7)
+plt.colorbar(label = 'Cluster')
+plt.title('Visualización de Clusters con PCA')
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.show()
+    """, language = "python")
+
+    st.write("Canciones por cluster")
+    st.code("""
+# Distribución de canciones por cluster en las playlists
+plt.figure(figsize = (15, 5))
+df_tracks['Cluster'].value_counts().plot(kind = 'pie', autopct = '%1.1f%%', colors = sns.color_palette('Set1', n_colors = 4))
+plt.title('Distribución de canciones por cluster en las playlists', fontsize = 16)
+plt.ylabel('')
+plt.show()
+            
+# Validación del clustering
+score = silhouette_score(df_canciones[numeric_columns], df_canciones['Cluster'])
+print(f'Silhouette Score: {score}')
+            
+# Guardamos CSV
+df_canciones.to_csv('canciones_clusterizadas.csv', index = False)
+    """, language = "python")
+
+    st.write("Recomendación de canciones")
+    st.code("""
+# Recomendación de canciones.
+def recomendar_canciones(cancion_id, df, n=5):
+    cluster_id = df.loc[cancion_id, 'Cluster']
+    canciones_similares = df[df['Cluster'] == cluster_id].sample(n)
+    return canciones_similares[['nombre', 'artistas']]
+
+recomendaciones = recomendar_canciones(cancion_id = 0, df = df_canciones)
+print(recomendaciones)
+    """, language = "python")
+
+    st.write("Otros modelados para canciones")
+    st.write("Modelado predictivo")
+    st.code("""
+# Selección de columnas numéricas relevantes para clustering
+numeric_columns_canciones = ['duración (segundos)', 'danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']
+
+# Definir las características y la variable objetivo
+X = df_canciones[numeric_columns_canciones]
+y = df_canciones['popularidad']
+
+# Dividir los datos en entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Crear el modelo de regresión lineal
+model_lr = LinearRegression()
+
+# Ajustar el modelo
+model_lr.fit(X_train, y_train)
+
+# Predecir sobre los datos de prueba
+y_pred = model_lr.predict(X_test)
+
+# Evaluar el modelo
+mse = mean_squared_error(y_test, y_pred)
+print(f'Mean Squared Error (MSE) de la regresión lineal: {mse}')
+    """, language = "python")
+
+    st.write("Random Forest Regressor para popularidad")
+    st.code("""
+# Crear el modelo RandomForestRegressor
+model_rf = RandomForestRegressor(n_estimators = 100, random_state = 42)
+
+# Ajustar el modelo
+model_rf.fit(X_train, y_train)
+
+# Predecir sobre los datos de prueba
+y_pred_rf = model_rf.predict(X_test)
+
+# Evaluar el modelo
+mse_rf = mean_squared_error(y_test, y_pred_rf)
+print(f'Mean Squared Error (MSE) de RandomForestRegressor: {mse_rf}')
+    """, language = "python")
+
+    st.write("Análisis de Componentes Principales (PCA)")
+    st.code("""
+# Ajustar PCA
+pca_canciones = PCA(n_components = 2)  # Reducir a 2 componentes principales
+df_canciones_pca = pca_canciones.fit_transform(df_canciones[numeric_columns_canciones])
+
+# Crear un DataFrame con los componentes principales
+df_pca_canciones = pd.DataFrame(df_canciones_pca, columns = ['PCA1', 'PCA2'])
+
+# Visualizar la reducción de dimensionalidad
+plt.figure(figsize = (15, 5))
+sns.scatterplot(x = 'PCA1', y = 'PCA2', data = df_pca_canciones, s = 100, marker = 'o')
+plt.title('Reducción de Dimensionalidad usando PCA', fontsize = 16)
+plt.xlabel('PCA1', fontsize = 14)
+plt.ylabel('PCA2', fontsize = 14)
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Playlist (df_tracks)")
+    st.code("""
+# Tamaño de cada cluster en df_tracks
+print("Tamaño de cada cluster:")
+print(df_tracks['Cluster'].value_counts())
+print('') # Espacio en respuesta
+
+# Seleccionar columnas numéricas en df_tracks
+numeric_columns_tracks = df_tracks.select_dtypes(include=['number']).columns
+
+# Características promedio por cluster en df_tracks
+print("Características promedio por cluster:")
+cluster_stats_tracks = df_tracks.groupby('Cluster')[numeric_columns_tracks].mean()
+print(cluster_stats_tracks)
+print('') # Espacio en respuesta
+
+# Ejemplos representativos por cluster en df_tracks
+print("Ejemplos representativos por cluster:")
+for cluster_id in df_tracks['Cluster'].unique():
+    print(f"Cluster {cluster_id}:")
+    print(df_tracks[df_tracks['Cluster'] == cluster_id].head())
+    print('') # Espacio en respuesta            
+    """, language = "python")
+
+    st.write("Características promedio por cluster en playlists")
+    st.code("""
+# Graficar las características promedio por cluster
+plt.figure(figsize = (15, 5))
+
+# Crear un gráfico de barras para cada característica por cluster
+cluster_stats_tracks.plot(kind = 'bar', ax = plt.gca())
+
+plt.title('Características promedio por cluster en playlists', fontsize = 16)
+plt.xlabel('Cluster', fontsize = 14)
+plt.ylabel('Valor promedio', fontsize = 14)
+plt.xticks(rotation = 0)
+plt.legend(title = 'Características', bbox_to_anchor = (1.05, 1), loc = 'upper left')
+plt.tight_layout()
+
+plt.show()
+    """, language = "python")
+
+    st.write("Distribución de clusters en 2D usando PCA")
+    st.code("""
+# Seleccionar las características numéricas
+numeric_columns_tracks = df_tracks.select_dtypes(include = ['number']).columns
+
+# Aplicar PCA para reducir a 2 dimensiones
+pca = PCA(n_components = 2)
+pca_components = pca.fit_transform(df_tracks[numeric_columns_tracks])
+
+# Crear un DataFrame con las componentes PCA y los clusters
+df_pca = pd.DataFrame(data = pca_components, columns = ['PCA1', 'PCA2'])
+df_pca['Cluster'] = df_tracks['Cluster']
+
+# Graficar los resultados de PCA
+plt.figure(figsize = (15, 5))
+sns.scatterplot(x = 'PCA1', y = 'PCA2', hue = 'Cluster', data = df_pca, palette = 'Set1', s = 100, marker = 'o')
+plt.title('Distribución de clusters en 2D usando PCA', fontsize = 16)
+plt.xlabel('PCA1', fontsize = 14)
+plt.ylabel('PCA2', fontsize = 14)
+plt.legend(title = 'Cluster')
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Mapa de calor de correlaciones entre características")
+    st.code("""
+# Calcular la matriz de correlación
+correlation_matrix = df_tracks[numeric_columns_tracks].corr()
+
+# Graficar el mapa de calor
+plt.figure(figsize = (15, 5))
+sns.heatmap(correlation_matrix, annot = True, cmap = 'coolwarm', fmt = '.2f', cbar = True, vmin = -1, vmax = 1)
+plt.title('Mapa de calor de correlaciones entre características', fontsize = 16)
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Distribución de Danceability por Cluster")
+    st.code("""
+# Distribución de características por cluster
+plt.figure(figsize=(15, 5))
+sns.boxplot(x = 'Cluster', y = 'danceability', data = df_tracks)
+plt.title('Distribución de Danceability por Cluster', fontsize = 16)
+plt.xlabel('Cluster', fontsize = 14)
+plt.ylabel('Danceability', fontsize = 14)
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Centroides de los clusters por característica")
+    st.code("""
+# Calcular los centroides de cada cluster (ya calculado previamente en cluster_stats_tracks)
+centroides = cluster_stats_tracks
+
+# Graficar los centroides de los clusters
+centroides.plot(kind = 'bar', figsize = (15, 5), colormap = 'viridis')
+plt.title('Centroides de los clusters por característica', fontsize = 16)
+plt.xlabel('Características', fontsize = 14)
+plt.ylabel('Valor promedio', fontsize = 14)
+plt.xticks(rotation = 45)
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Duración promedio por Cluster en las playlists")
+    st.code("""
+# Duración promedio por cluster
+duracion_cluster = df_tracks.groupby('Cluster')['duración (segundos)'].mean()
+
+# Graficar
+plt.figure(figsize = (15, 5))
+duracion_cluster.plot(kind = 'bar', color = 'lightcoral')
+plt.title('Duración promedio por Cluster en las playlists', fontsize = 16)
+plt.xlabel('Cluster', fontsize = 14)
+plt.ylabel('Duración promedio (segundos)', fontsize = 14)
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Otros modelados para playlist")
+    st.write("Reducción de Dimensionalidad con t-SNE")
+    st.code("""
+# Reducir dimensiones con t-SNE
+tsne = TSNE(n_components = 2, random_state = 42)
+tsne_components = tsne.fit_transform(df_tracks[numeric_columns_tracks])
+
+# Graficar t-SNE
+plt.figure(figsize = (15, 5))
+plt.scatter(tsne_components[:, 0], tsne_components[:, 1], c = df_tracks['Cluster'], cmap = 'viridis', s = 100, alpha = 0.7)
+plt.title('Distribución de clusters con t-SNE', fontsize = 16)
+plt.xlabel('t-SNE 1', fontsize = 14)
+plt.ylabel('t-SNE 2', fontsize = 14)
+plt.colorbar(label = 'Cluster')
+plt.tight_layout()
+plt.show()
+    """, language = "python")
+
+    st.write("Modelado de Clasificación: Random Forest o XGBoost")
+    st.code("""
+# Separar variables predictoras y la variable objetivo
+X = df_tracks[numeric_columns_tracks]
+y = df_tracks['Cluster']
+
+# Dividir en conjunto de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 42)
+
+# Crear el modelo
+rf_model = RandomForestClassifier(n_estimators = 100, random_state = 42)
+
+# Entrenar el modelo
+rf_model.fit(X_train, y_train)
+
+# Predecir y evaluar el modelo
+y_pred = rf_model.predict(X_test)
+print(classification_report(y_test, y_pred))
+    """, language = "python")
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### Soy un separador ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# Algoritmos
+with st.expander("Algoritmos"):
+    st.write("Herramientas + datos")
+    st.code("""
+# Herramientas
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Cargar los datos
+playlists = pd.read_csv('playlists1.csv')  # Información general de las playlists
+canciones = pd.read_csv('canciones_total.csv')  # Características de las canciones
+tracks_playlists = pd.read_csv('tracks_playlists.csv')  # Relación entre playlists y canciones
+            
+# Realizamos la unión usando 'Canción ID' de tracks_playlists y 'canción id' de canciones
+tracks_playlists_info = pd.merge(
+    tracks_playlists, 
+    canciones[['canción id', 'danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']], 
+    left_on='Canción ID', 
+    right_on='canción id', 
+    how='inner'
+)
+
+# Verificamos el DataFrame resultante
+print(tracks_playlists_info.head())
+            
+# Agrupar por 'Playlist ID' y calcular el promedio de las características acústicas
+playlist_features = tracks_playlists_info.groupby('Playlist ID')[['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']].mean().reset_index()
+
+# Unir esta información con el DataFrame de playlists para obtener la información completa
+playlist_features = pd.merge(playlists, playlist_features, on='Playlist ID')
+
+# Ahora 'playlist_features' tiene las características promedio de las playlists
+    """, language = "python")
+
+    st.write("Ingresar la ID playlist que queramos")
+    st.code("""
+playlist_usuario_id = "3IyNJEsknaSFoUIn8qf1Lr"
+    """, language = "python")
+
+    st.code("""
+# Supongamos que el usuario selecciona una playlist (por ejemplo, 'Playlist ID' = 1)
+
+# Obtener las canciones en esa playlist
+playlist_usuario_canciones = tracks_playlists_info[tracks_playlists_info['Playlist ID'] == playlist_usuario_id]
+
+# Promediamos las características de las canciones de esa playlist
+playlist_usuario_features = playlist_usuario_canciones[['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']].mean().values.reshape(1, -1)
+
+# Extraer las características acústicas de todas las canciones
+canciones_features = canciones[['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']]
+
+# Calcular la similitud entre la playlist del usuario y todas las canciones
+similitud_canciones = cosine_similarity(playlist_usuario_features, canciones_features)
+
+# Ordenar las canciones por similitud (de mayor a menor)
+indices_similares = similitud_canciones.argsort()[0][::-1]
+
+# Obtener las canciones más similares (por ejemplo, las 5 primeras)
+canciones_recomendadas = canciones.iloc[indices_similares[:5]]
+print(canciones_recomendadas[['nombre', 'artistas']])
+            
+# Obtener las características acústicas de la playlist del usuario
+playlist_usuario_features = playlist_features[playlist_features['Playlist ID'] == playlist_usuario_id][['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']].values
+
+# Calcular la similitud del coseno entre la playlist del usuario y todas las playlists
+similitud_playlists = cosine_similarity(playlist_usuario_features, playlist_features[['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'speechiness']])
+
+# Ordenar las playlists por similitud (de mayor a menor)
+indices_similares_playlists = similitud_playlists.argsort()[0][::-1]
+
+# Obtener las playlists más similares (por ejemplo, las 5 primeras)
+playlists_recomendadas = playlist_features.iloc[indices_similares_playlists[:5]]
+print(playlists_recomendadas[['Nombre Playlist', 'Descripción']])
+    """, language = "python")
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### Soy un separador ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+
+# Creación de BBDD en MySQL
 with st.expander("Código SQL en MySQL para la creación de la base de datos"):
     st.code("""
     CREATE DATABASE Proyecto_Spotify;
@@ -593,6 +1184,9 @@ with st.expander("Código SQL en MySQL para la creación de la base de datos"):
     );
     """, language = "sql")
 
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### Soy un separador ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+# Importar datos a MySQL con Python / SQLAlchemy
 with st.expander("Código Python para conexión y carga de datos"):
     st.code("""
 # Herramientas.
