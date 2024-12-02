@@ -1,26 +1,12 @@
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-import altair as alt
-#from Modules.EDA import collect_data
-from Modules.graficos_playlist import graficos
-from Modules.graficos_sprint_2 import atributos,grafico_genero
-
-from Modules.Clustering import clustering_canciones,clustering_playlist
-#from Modules.graficos_sprint_3 import grafico_genero,grafico_artistas,atributos,graficos_extras,comparador_genero,comparador_artistas,comparador_atributos
-from Modules.enlace_playlist import playlist,playlist2
-from Modules.playlist_usuario import collect_data,predecir_genero_canciones,clustering_canciones1
-from Modules.graficos_sprint_3_pl_usuario import grafico_genero1,grafico_artistas1,atributos1,graficos_extras1,comparador_genero1,comparador_artistas1,comparador_atributos1,comparador_genero_cancion,comparador_artistas_canciones,comparador_atributos_canciones
-from Modules.Clustering_pl_usuario import clustering_canciones1
+from Modules.graficos_sprint_2 import atributos
+from Modules.enlace_playlist import playlist
+from Modules.playlist_usuario import collect_data
 from Modules.algoritmos import algoritmo
 
 def app_recomendador():
-    # Configurador de la página
-    st.set_page_config(
-        page_title = "Recomendador",
-        page_icon = "🎧",
-        layout = "wide"
-    )
+    
     
     # Título principal
     st.markdown('<h1 class="title">Recomendador</h1>', unsafe_allow_html=True)
@@ -145,15 +131,15 @@ def app_recomendador():
     # Tabla de canciones recomendadas
     st.markdown('<h2 style="text-align: center; margin-top: 30px;">Canciones recomendadas</h2>', unsafe_allow_html=True)
 
+    if playlist_id:
+        canciones_recomendadas,_=algoritmo(playlist_id)
+        canciones_recomendadas.columns=["Cancion ID", "Nombre", "Artistas", "Duración", "popularidad","explícito","Fecha de Lanzamiento","Url de Spotify","imagen","danceability","energy","valence","tempo","acousticness","instrumentalness","speechiness","clave (key)","modo (mode)","predicted_genre"]
+        columnas=["Cancion ID", "Nombre", "Artistas", "Duración", "Fecha de Lanzamiento","Url de Spotify"]
 
-    canciones_recomendadas,_=algoritmo(playlist_id)
-    canciones_recomendadas.columns=["Cancion ID", "Nombre", "Artistas", "Duración", "popularidad","explícito","Fecha de Lanzamiento","Url de Spotify","imagen","danceability","energy","valence","tempo","acousticness","instrumentalness","speechiness","clave (key)","modo (mode)","predicted_genre"]
-    columnas=["Cancion ID", "Nombre", "Artistas", "Duración", "Fecha de Lanzamiento","Url de Spotify"]
-
-    # Mostrar tabla en un diseño estilizado
-    st.markdown('<div class="table-container">', unsafe_allow_html=True)
-    st.dataframe(canciones_recomendadas[columnas], hide_index=True,use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        # Mostrar tabla en un diseño estilizado
+        st.markdown('<div class="table-container">', unsafe_allow_html=True)
+        st.dataframe(canciones_recomendadas[columnas], hide_index=True,use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

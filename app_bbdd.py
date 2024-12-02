@@ -2,34 +2,32 @@ import streamlit as st
 import pandas as pd
 import pymysql
 
-# Configuración de la conexión a la base de datos
-DB_CONFIG = {
-    "user": "root",
-    "password": "Jp261191.",
-    "database": "Proyecto_Spotify",
-    "host": "localhost",
-    "port": 3306
-}
-
-def fetch_data(query):
-    """Función para ejecutar una consulta SQL y devolver un DataFrame."""
-    try:
-        connection = pymysql.connect(**DB_CONFIG)
-        df = pd.read_sql(query, connection)
-        connection.close()
-        return df
-    except Exception as e:
-        st.error(f"Error al conectar con la base de datos: {e}")
-        return pd.DataFrame()
 
 def app_bbdd():
-    # Configuración de la página de Streamlit
-    st.set_page_config(
-        page_title = "Base de Datos",
-        page_icon = "🗂️",
-        layout = "wide"
-    )
-    
+
+
+        # Configuración de la conexión a la base de datos
+    DB_CONFIG = {
+        "user": "root",
+        "password": "password",
+        "database": "Proyecto_Spotify",
+        "host": "localhost",
+        "port": 3306
+    }
+
+    def fetch_data(query):
+        """Función para ejecutar una consulta SQL y devolver un DataFrame."""
+        try:
+            connection = pymysql.connect(**DB_CONFIG)
+            df = pd.read_sql(query, connection)
+            connection.close()
+            return df
+        except Exception as e:
+            st.error(f"Error al conectar con la base de datos: {e}")
+            return pd.DataFrame()
+
+   
+
     # Título de la página
     st.title("Base de Datos")
     st.write("Explora la arquitectura de la base de datos utilizada en este proyecto. Aquí podrás ver las tablas, sus columnas y sus funciones.")

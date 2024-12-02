@@ -1,16 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
-import altair as alt
 from Modules.graficos_sprint_2 import grafico_genero, grafico_artistas1, explicit_top_tracks
-from menu import menu_stream
 
-st.title("Top Tracks")
 
-    # Llamar al menú
-menu, option = menu_stream(context= "top_tracks")
+
+
+
 
 def top_tracks():
+    st.title("Top Tracks")
+
+    
     # Contenedor principal para los gráficos
     with st.container():
         col1, col2 = st.columns([1, 1])
@@ -84,8 +85,5 @@ def top_tracks():
 if __name__ == "__main__":
     top_tracks()
 
-elif menu == "HomePage":
-        exec(open("pruebahome.py").read())
 
-elif menu == "Para creadores":
-        exec(open("para_creadores.py").read())
+

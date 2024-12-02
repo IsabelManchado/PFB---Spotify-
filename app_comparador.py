@@ -1,22 +1,15 @@
 
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-from Modules.Clustering import clustering_canciones,clustering_playlist
-from Modules.graficos_sprint_3 import grafico_genero,grafico_artistas,atributos,graficos_extras,comparador_genero,comparador_artistas,comparador_atributos,comparador_genero_canciones1,comparador_artistas_canciones1,comparador_atributos_canciones1
-from Modules.enlace_playlist import playlist,playlist2
-from Modules.playlist_usuario import collect_data,predecir_genero_canciones,clustering_canciones1
-from Modules.graficos_sprint_3_pl_usuario import grafico_genero1,grafico_artistas1,atributos1,graficos_extras1,comparador_genero1,comparador_artistas1,comparador_atributos1,comparador_genero_cancion,comparador_artistas_canciones,comparador_atributos_canciones
-from Modules.Clustering_pl_usuario import clustering_canciones1
+from Modules.graficos_sprint_3 import comparador_genero,comparador_artistas,comparador_atributos,comparador_genero_canciones1,comparador_artistas_canciones1,comparador_atributos_canciones1
+from Modules.enlace_playlist import playlist2
+from Modules.playlist_usuario import collect_data
+
 
 
 def app_comparador():
-    # Configurador de la página
-    st.set_page_config(
-        page_title = "Comparador",
-        page_icon = "🔍",
-        layout = "wide"
-    )
+   
+   
     # Título de la página
     st.markdown('<h1 class="title">Comparador</h1>', unsafe_allow_html=True)
     st.write("En esta sección podrás comparar playlist y canciones desde los artistas y géneros más populares hasta sus características medibles.")
@@ -25,15 +18,14 @@ def app_comparador():
     df_tracks= pd.read_csv(r'..\PFB---Spotify-\EDA\Tracks_playlists.csv')
     df_tracks.columns=["canción id","Playlist ID"]
     df_canciones_playlist=pd.merge(df_tracks, df_playlist, on="Playlist ID", how="left")
-    df_resultado = pd.merge(df_canciones, df_canciones_playlist, on="canción id", how="left")
     playlist_url1=st.text_input("Ingrese el enlace de una playlist de Spotify:") 
     
     playlist_url2=st.text_input("Ingrese el enlace de la segunda playlist de Spotify:")
     
     playlist_ids = playlist2(playlist_url1, playlist_url2)
-    
-    playlist_seleccionada1 = collect_data(playlist_ids[0])
-    playlist_seleccionada2 = collect_data(playlist_ids[1])
+    if playlist_ids:
+        playlist_seleccionada1 = collect_data(playlist_ids[0])
+        playlist_seleccionada2 = collect_data(playlist_ids[1])
     if len(playlist_ids)==2:
                 
                 col1, col2, col3, col4, col5 = st.columns((0.5,1,1,0.5,1), gap='small')

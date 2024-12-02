@@ -3,8 +3,18 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import altair as alt
 from menu import menu_stream
-import subprocess
-import top_tracks
+from top_tracks import top_tracks
+from app_comparador import app_comparador
+from app_recomendador import app_recomendador
+from app_aboutus import about
+from app_whyandhow import whyandhow
+from para_creadores import para_creadores
+from app_bbdd import app_bbdd
+
+
+
+
+
 
 # Configuración de la página
 st.set_page_config(
@@ -57,27 +67,27 @@ def homepage():
                 st.image("Modules/home.jpg", use_column_width=False, width=700)
 
     elif menu == "Top Tracks":
-        top_tracks.app()
+        top_tracks()
 
     elif menu == "Para creadores":
-        exec(open("para_creadores.py", encoding="utf-8").read())
+        df = pd.read_csv(r"..\PFB---Spotify-\EDA\canciones_total.csv")
+        para_creadores(df)
 
 
     elif menu == "Comparador":
-        exec(open("app_comparador.py", encoding="utf-8").read())
-        subprocess.run(["python", "app_comparador.py"])
+        app_comparador()
 
     elif menu == "Recomendador":
-        exec(open("app_recomendador.py", encoding="utf-8").read())
+        app_recomendador()
 
     elif menu == "Base de datos":
-        exec(open("app_bbdd.py", encoding="utf-8").read())
+        app_bbdd()
 
     elif menu == "Cómo y porqué":
-        exec(open("app_whyandhow.py", encoding="utf-8").read())
+        whyandhow()
 
     elif menu == "About":
-        exec(open("app_aboutus.py", encoding="utf-8").read())
+        about()
 
     # Pie de página
     st.markdown("---")
