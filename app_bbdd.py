@@ -9,7 +9,7 @@ def app_bbdd():
         # Configuración de la conexión a la base de datos
     DB_CONFIG = {
         "user": "root",
-        "password": "password",
+        "password": "Jp261191.",
         "database": "Proyecto_Spotify",
         "host": "localhost",
         "port": 3306

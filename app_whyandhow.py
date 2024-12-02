@@ -523,8 +523,8 @@ def whyandhow():
         "Instrumentalness", "Speechiness", "Clave (Key)", "Modo (Mode)"
     ])
 
-    client_id = "10d944ee7fad41d9aa6b0e04a09a96c4"
-    client_secret = "d5db29896c074e95b7ae73777feadb79"
+    client_id = "inserte aquí su client_id"
+    client_secret = "inserte aquí su client_secret"
     access_token = obtener_token(client_id, client_secret)
 
     if access_token:
