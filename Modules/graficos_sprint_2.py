@@ -411,7 +411,23 @@ def comparador_atributos(playlist_id1,playlist_id2):
     return st.plotly_chart(fig)
 
 
+def explicit_top_tracks(df):
+    # Contar valores en la columna 'Explícito'
+    explicit_counts = df['explícito'].value_counts()
 
+    # Crear el gráfico de pastel
+    plt.figure(figsize=(6, 6), dpi=150)
+    plt.pie(
+        explicit_counts,
+        labels=explicit_counts.index,
+        autopct='%1.1f%%',
+        colors= ["grey", "green"],
+        startangle=140
+    )
+
+    
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(plt)
 
 
 # def grafico_artistas2(df):
