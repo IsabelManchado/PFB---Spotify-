@@ -154,3 +154,159 @@ def graficos(df):
     #     #radar_fig.show()
    
     return heatmap, bubble, scatter, hist, box_plot, violin, area #, radar_fig
+
+import plotly.graph_objects as go
+
+def pc_pregunta1(df):
+    quantitative_columns = [
+        'danceability', 'energy', 'valence', 'tempo', 
+        'acousticness', 'instrumentalness', 'speechiness', 
+        'popularidad', 'duración (segundos)'
+    ]
+
+    # Calcular la matriz de correlación
+    corr_matrix = df[quantitative_columns].corr()
+
+    heatmap = go.Figure(data=go.Heatmap(
+        z=corr_matrix.values,
+        x=corr_matrix.columns,
+        y=corr_matrix.columns,
+        colorscale="Viridis"
+    ))
+    st.plotly_chart(heatmap, use_container_width=True)
+
+
+def pc_pregunta2(df):
+
+    """
+    Genera un gráfico de líneas de contorno para analizar la densidad de Valence vs Popularidad.
+    """
+    try:
+        df_prueba = df.sample(frac=0.05, random_state=42)  # Tomar solo el 5% de los datos
+
+        fig = px.density_contour(
+            df_prueba,
+            x="valence",
+            y="popularidad",
+            title="Densidad de Valence vs Popularity (Contornos)",
+            labels={"valence": "Valence (Happiness)", "popularidad": "Popularity"},
+        )
+
+        fig.update_layout(
+            paper_bgcolor="black",  
+            plot_bgcolor="black",  
+            font=dict(color="white"),  
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    except KeyError as e:
+        st.error(f"Error: Falta la columna {e} en el DataFrame.")
+    except Exception as e:
+        st.error(f"Error al generar el gráfico de contornos: {e}")
+
+
+
+def pc_pregunta3(df):
+        plt.figure(figsize=(8, 6))
+        plt.style.use('dark_background')
+        plt.hist(df['tempo'], bins=30, alpha=0.7)  
+        plt.title('Distribución del Ritmo (Tempo)')
+        plt.xlabel('Tempo (BPM)')
+        plt.ylabel('Frecuencia')
+        st.pyplot(plt, use_container_width=True)  
+
+def pc_pregunta4(df):
+
+    try:
+        df['fecha de lanzamiento'] = pd.to_datetime(df['fecha de lanzamiento'], errors='coerce')
+        df = df.dropna(subset=['fecha de lanzamiento'])
+
+        
+        area = px.area(
+            df.sort_values('fecha de lanzamiento'),   
+            x='fecha de lanzamiento',
+            y='popularidad',
+            title='Tendencia de Popularidad en el Tiempo',
+            labels={'fecha de lanzamiento': 'Fecha de Lanzamiento', 'popularidad': 'Popularidad'},
+        )
+
+        
+        area.update_layout(
+            paper_bgcolor="black",  
+            plot_bgcolor="black",  
+            font=dict(color="white")  
+        )
+
+        # Mostrar el gráfico en Streamlit
+        st.plotly_chart(area, use_container_width=True)
+
+    except KeyError as e:
+        st.error(f"Error: Falta la columna {e} en el DataFrame.")
+    except Exception as e:
+        st.error(f"Error al generar el gráfico: {e}")
+
+def pc_pregunta5(df):
+
+    """
+    Genera un gráfico de líneas de contorno para analizar la densidad de Valence vs Popularidad.
+    """
+
+    df_prueba = df.sample(frac=0.05, random_state=42)  # Tomar solo el 5% de los datos
+
+    fig = px.density_contour(
+            df_prueba,
+            x="danceability",
+            y="energy",
+            title="Densidad de Danceability vs Energy (Contornos)",
+            labels={"danceability": "Danceability", "energy": "energy"},
+        )
+
+    fig.update_layout(
+            paper_bgcolor="black",  
+            plot_bgcolor="black",  
+            font=dict(color="white"),  
+        )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+def pc_pregunta6(df):
+    df_prueba = df.sample(frac=0.05, random_state=42)
+    box_plot = px.box(
+            df_prueba,
+            y='danceability',
+            points="all",  
+            title='Distribución de Danceability',
+            labels={'danceability': 'Danceability'},
+        )
+
+        
+    box_plot.update_layout(
+            paper_bgcolor="black",  
+            plot_bgcolor="black",  
+            font=dict(color="white")  
+        )
+
+       
+    st.plotly_chart(box_plot, use_container_width=True)
+
+def pc_pregunta7(df):
+    violin = px.violin(
+            df,
+            y='danceability',
+            x='explícito',
+            box=True,  
+            points="all",  
+            title='Distribución de Danceability en canciones "Explícitas"',
+            labels={'danceability': 'Danceability', 'explícito': 'Explícito'},
+        )
+
+        # Configuración de diseño
+    violin.update_layout(
+            paper_bgcolor="black",  
+            plot_bgcolor="black",  
+            font=dict(color="white")  
+        )
+
+        
+    st.plotly_chart(violin, use_container_width=True)
